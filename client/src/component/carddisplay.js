@@ -36,6 +36,10 @@ function CardDisplay() {
       citynames.forEach(async (cityname) => {
         const url = `http://api.openweathermap.org/data/2.5/weather?q=${cityname}&units=metric&appid=5742cc42b5c06616dc61ea777dd3b089`;
         const resp = await fetch(url);
+        if (!resp.ok) {
+          alert(`No weather data found for city: ${cityname}`);
+          return;
+        }
         const respJson = await resp.json();
         console.log(respJson.main);
         const temperature = respJson.main.temp;
