@@ -25,7 +25,7 @@ function WeatherApp() {
 
   useEffect(() => {
     const fetchApi = async () => {
-      const url = `http://api.openweathermap.org/data/2.5/weather?q=${search}&units=metric&appid=5742cc42b5c06616dc61ea777dd3b089`;
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${search}&units=metric&appid=5742cc42b5c06616dc61ea777dd3b089`;
       const resp = await fetch(url);
       const respJson = await resp.json();
       setCity(respJson.main);
