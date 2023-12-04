@@ -9,7 +9,7 @@ const Cities = require('./models/cities');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
+// mongodb+srv://aashi2673:vxegsdB7K477Op0G@cluster0.76v0orf.mongodb.net/?retryWrites=true&w=majority
 const connectDB = async () => {
   try {
     await mongoose.connect('mongodb+srv://aashi2673:vxegsdB7K477Op0G@cluster0.76v0orf.mongodb.net/', {
@@ -30,7 +30,6 @@ app.get('/', (req, res) => {
 
 app.get('/api/cities', async (req, res) => {
   const { email } = req.query;
-
   try {
     const cities = await Cities.find({ email }); // Find all cities with the provided email
 
