@@ -17,7 +17,7 @@ function CardDisplay() {
 
       const weatherData = await Promise.all(
         cityNames.map(async (cityname) => {
-          const url = `http://api.openweathermap.org/data/2.5/weather?q=${cityname}&units=metric&appid=5742cc42b5c06616dc61ea777dd3b089`;
+          const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityname}&units=metric&appid=5742cc42b5c06616dc61ea777dd3b089`;
           const resp = await fetch(url);
 
           if (!resp.ok) {
