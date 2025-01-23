@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import Navbar from './navbar';
+
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();
 
   const handleLogin = () => {
     // Send login request to the server
@@ -34,57 +35,10 @@ const Login = () => {
         console.error('Error:', error);
       });
   };
-  const navigateToLogin = () => {
-    navigate("/login");
-  };
 
-  const navigateToSignup = () => {
-    navigate("/register");
-  };
-
-  const navigateToHome = () => {
-    navigate("/");
-  };
-
-  const navigateToCard = () => {
-    console.log("working");
-    navigate("/carddisplay");
-  };
-  const shouldDisplayLoginButton = () => {
-    return !localStorage.getItem("user");
-  };
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/");
-  };
   return (
     <>
-    <div className="navbar">
-        <ul>
-          <li>
-            <a href="/" onClick={navigateToHome}>
-              🌧️
-            </a>
-          </li>
-          <li>
-            <a href="/carddisplay" onClick={navigateToCard}>
-              Weather
-            </a>
-          </li>
-          <li className="navbar-buttons">
-            {shouldDisplayLoginButton() ? (
-              <div className="zipcodeInput" style={{marginLeft: '1050px'}}>
-                <button onClick={navigateToLogin}>Login</button>
-                <button onClick={navigateToSignup}>Signup</button>
-              </div>
-            ) : (
-              <div className="zipcodeInput" style={{marginLeft: '1100px'}}>
-                <button onClick={handleLogout}>Logout</button>
-              </div>
-            )}
-          </li>
-        </ul>
-      </div>
+    <Navbar />
     <div className='login'>
       <h2>Login</h2>
       <input

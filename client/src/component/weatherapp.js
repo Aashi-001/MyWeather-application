@@ -1,184 +1,163 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import "./css/styles.css";
-import thunderstorm from '../images/rain.png';
-import sunny from '../images/sunny.png';
-import partiallycloudy from '../images/partiallycloudy.png';
-import cleannight from '../images/clearnight.png';
-import rainy from '../images/rainy.png';
-import haze from '../images/hazy.png';
-import latehaze from '../images/hazynight.png';
-import laterain from '../images/laterain.png';
-import cloudynight from '../images/cloudynight.png';
-import cloudyday from '../images/cloudyday.png';
+import Navbar from "./navbar";
+import { getWeatherIcon } from "../utilities/getWeathericon";
+import paritallyCloudy from "../images/partiallycloudy.png";
 
 
 function WeatherApp() {
-  const [city, setCity] = useState(null);
   const [search, setSearch] = useState(null);
-  const navigate = useNavigate();
-  const [weatherIcon, setIcon] = useState(null);
-  const [sunrisetime, setsunrise] = useState(null);
-  const [sunsettime, setsunset] = useState(null);
-  const [speed, setspeed] = useState(null);
-  const [degree, setdegree] = useState(null);
+  const [weatherData, setWeatherData] = useState({
+    temperature: null,
+    humidity: null,
+    pressure: null,
+    description: null,
+    icon: paritallyCloudy,
+    sunrisetime: null,
+    sunsettime: null,
+    speed: null,
+    degree: null,
+    city: null,
+    currenttime: null,
+    desc: null,
+  });
 
   useEffect(() => {
+    if (!search) {
+      setWeatherData({
+        temperature: null,
+        mintemp: null,
+        maxtemp: null,
+        humidity: null,
+        pressure: null,
+        description: null,
+        icon: paritallyCloudy,
+        sunrisetime: null,
+        sunsettime: null,
+        speed: null,
+        degree: null,
+        city: null,
+        desc: null,
+      })
+      return;
+    }
     const fetchApi = async () => {
+    try{
       const url = `http://api.openweathermap.org/data/2.5/weather?q=${search}&units=metric&appid=5742cc42b5c06616dc61ea777dd3b089`;
       const resp = await fetch(url);
+      if(!resp.ok) {
+        console.log('No weather data found for city:', search);
+        // return ;
+        setWeatherData({
+          temperature: null,
+          mintemp: null,
+          maxtemp: null,
+          humidity: null,
+          pressure: null,
+          description: null,
+          icon: paritallyCloudy,
+          sunrisetime: null,
+          sunsettime: null,
+          speed: null,
+          degree: null,
+          city: null,
+          desc: null,
+        });
+        return
+      }
       const respJson = await resp.json();
-      setCity(respJson.main);
-      const weatherId = respJson.weather;
-      if(weatherId && weatherId.length > 0){
-        const id = weatherId[0].id;
-        const obj = respJson;
-        const timestamp = obj.dt;
-        const timezoneOffsetInSeconds = obj.timezone; 
-        const localDateTime = new Date((timestamp + timezoneOffsetInSeconds) * 1000);
-        const dstOffset = localDateTime.getTimezoneOffset() * 60 * 1000;
-        const adjustedDateTime = new Date(localDateTime.getTime() + dstOffset);
-        const hours = adjustedDateTime.getHours();
+
+      if (respJson.main && respJson.weather) {
         const sunrise = respJson.sys.sunrise;
         const sunset = respJson.sys.sunset;
         const date1 = new Date(sunrise * 1000);
         const date2 = new Date(sunset * 1000);
         const sunrise_time = date1.toLocaleTimeString();
         const sunset_time = date2.toLocaleTimeString();
-        const wind_speed = respJson.wind.speed;
-        const wind_degree = respJson.wind.deg;
-        console.log(wind_speed);
-        console.log(wind_degree);
-        console.log(sunrise_time);
-        console.log(sunset_time);
-        setsunrise(sunrise_time);
-        setsunset(sunset_time);
-        setspeed(wind_speed);
-        setdegree(wind_degree);
-        // console.log(weatherId);
-        console.log(id);
-        console.log(weatherId);
-        console.log(hours);
-        // setIcon(id);
-        let w_icon = null;
-      if (id >= 200 && id < 300 && hours<=19 && hours>=5) {
-        w_icon = thunderstorm;
-      } else if (id >= 300 && id < 500 && hours<=19 && hours>=5) {
-        w_icon = rainy;
-      } else if (id >= 500 && id < 600 && hours<=19 && hours>=5) {
-        w_icon = rainy;
-      } else if (id >= 600 && id < 700 && hours<=19 && hours>=5) {
-        w_icon = thunderstorm;
-      } else if (id >= 700 && id < 800 && hours<=19 && hours>=5) {
-        w_icon = haze;
-      } else if (id === 800 && hours<=19 && hours>=5) {
-        w_icon = sunny;
-      } else if (id > 800 && hours<=19 && hours>=5) {
-        w_icon = cloudyday;
-      } else if (id >= 300 && id < 500) {
-        w_icon = laterain;
-      } else if (id >= 500 && id < 600) {
-        w_icon = laterain;
-      } else if (id >= 600 && id < 700) {
-        w_icon = thunderstorm;
-      } else if (id >= 700 && id < 800) {
-        w_icon = latehaze;
-      } else if (id === 800) {
-        w_icon = cleannight;
-      } else if (id > 800) {
-        w_icon = cloudynight;
+        const timestamp = respJson.dt;
+        const timezoneOffsetInSeconds = respJson.timezone; 
+        const localDateTime = new Date((timestamp + timezoneOffsetInSeconds) * 1000);
+        const adjustedDateTime = new Date(localDateTime.getTime() + (localDateTime.getTimezoneOffset() * 60 * 1000));
+        const hours = adjustedDateTime.getHours();
+        const desc = respJson.weather[0].main;
+        const curr_time = adjustedDateTime.toLocaleTimeString();
+        console.log(respJson.main.temp);
+        setWeatherData({
+          temperature: respJson.main.temp,
+          humidity: respJson.main.humidity,
+          pressure: respJson.main.pressure,
+          description: respJson.weather[0].main,
+          icon: getWeatherIcon(respJson.weather[0].id, hours),
+          sunrisetime: sunrise_time,
+          sunsettime: sunset_time,
+          speed: respJson.wind.speed,
+          degree: respJson.wind.deg,
+          city: respJson.name,
+          mintemp: respJson.main.temp_min,
+          maxtemp: respJson.main.temp_max,
+          desc: desc,
+          currenttime: curr_time,
+        });
       }
-
-      setIcon(w_icon);
-      }
-      else{
-        setIcon(partiallycloudy);
-      }
-      // console.log(setIcon);
+    } catch(error) {
+      console.error('Error fetching weather data:', error);
+    }
     };
 
     fetchApi();
   }, [search]);
 
-      const navigateToLogin = () => {
-        navigate("/login");
-      };
-
-      const navigateToSignup = () => {
-        navigate("/register");
-      };
-
-      const navigateToHome = () => {
-        navigate("/");
-      };
-
-      const navigateToCard = () => {
-        console.log("working");
-        navigate("/carddisplay");
-      };
-      const shouldDisplayLoginButton = () => {
-        return !localStorage.getItem("user");
-      };
-      const handleLogout = () => {
-        localStorage.removeItem("user");
-        navigate("/");
-      };
-
   return (
     <>
-      <div className="navbar">
-        <ul>
-          <li>
-            <a href="/" onClick={navigateToHome}>
-              🌧️
-            </a>
-          </li>
-          <li>
-            <a href="/carddisplay" onClick={navigateToCard}>
-              Weather
-            </a>
-          </li>
-          <li className="navbar-buttons">
-            {shouldDisplayLoginButton() ? (
-              <div className="zipcodeInput" style={{marginLeft: '1050px'}}>
-                <button onClick={navigateToLogin}>Login</button>
-                <button onClick={navigateToSignup}>Signup</button>
-              </div>
-            ) : (
-              <div className="zipcodeInput" style={{marginLeft: '1100px'}}>
-                <button onClick={handleLogout}>Logout</button>
-              </div>
-            )}
-          </li>
-        </ul>
-      </div>
-
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundImage: `url(${weatherData.icon})`,
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+        backgroundColor: "rgba(0, 0, 0, 0.61)",
+        backgroundBlendMode: "overlay",
+        zIndex: -1,
+      }}
+    ></div>
+      <Navbar />
       <div className="weatherCardContainer" style={{textAlign: 'center'}}>
-        <div className="weatherCard" style={{backgroundImage: `url(${weatherIcon})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover'}}>
+        <div className="weatherCard" style={{backgroundImage: `url(${weatherData.icon})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover'}}>
           <div className="input">
             <input
               type="search"
               className="inputField"
+              style={{
+                width: '270px',
+                borderRadius: '20px',
+                padding: '8px 12px',
+                border: '2px solid #ccc',
+                fontSize: '16px',
+                marginTop: '20px',
+              }}
               onChange={(event) => {
                 setSearch(event.target.value);
               }}
             />
           </div>
-          {!city ? (
+          {!weatherData.city ? (
             <p></p>
           ) : (
             <div className="info">
-              <h1 className="loc">{search}</h1>
-              <h2 className="temp">🌡️ {city.temp} °C</h2>
+              <h2 className="loc">{search}</h2>
+              <h1 className="loc">{weatherData.desc}</h1>
+              <h2 className="temp">🌡️ {weatherData.temperature} °C </h2> 
               <h3 className="othertemp">
-                Min : {city.temp_min} <span className="tab">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Max : {city.temp_max}
+                Min : {weatherData.mintemp} °C<span className="tab">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Max : {weatherData.maxtemp} °C
               </h3>
-              <h4>Humidity : {city.humidity} </h4>
-              <h4>Pressure : {city.pressure}</h4>
-              <h4 style={{color: 'orange'}}> 🌅 Sunrise : {sunrisetime} AM</h4>
-              <h4 style={{color: 'orange'}}> 🌇 Sunset : {sunsettime} PM</h4>
-              <h4> 🌫️ Wind Speed : {speed} </h4>
-              <h4> 🧭 Wind Degree : {degree} </h4>
+              <h4>Current time : {weatherData.currenttime}</h4>
+              <h4 style={{color: 'orange'}}> 🌅 Sunrise : {weatherData.sunrisetime}<span className="tab">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>🌇 Sunset : {weatherData.sunsettime}</h4>
+              <h4> 🌫️ Wind Speed : {weatherData.speed}<span className="tab">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>🧭 Wind Degree : {weatherData.degree} </h4>
+              <h4> Humidity : {weatherData.humidity}<span className="tab">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Pressure : {weatherData.pressure}</h4>
             </div>
           )}
         </div>
